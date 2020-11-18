@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "@emotion/styled";
-
+import { calcularMarca, obtenerDiferenciaYear, obtenerPlan } from "../helper";
 const Campo = styled.div`
   display: flex;
   margin-bottom: 1rem;
@@ -38,12 +38,22 @@ const Boton = styled.button`
     cursor: pointer;
   }
 `;
-const Formulario = () => {
+
+const Error = styled.div`
+  background-color: red;
+  color: white;
+  padding: 1rem;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 2rem;
+`;
+const Formulario = ({ guardarResumen }) => {
   const [datos, guardar] = useState({
     marca: "",
     year: "",
     plan: "",
   });
+  const [error, guardarError] = useState(false);
 
   // extraer los valores del state
 
@@ -51,15 +61,53 @@ const Formulario = () => {
 
   // leer datos del formulario y colocarlos en state
 
-  const obtenerInformacion = (e) => {
+  const obtenerInformacion = (evt) => {
     guardar({
       ...datos,
-      [e.target.name]: e.target.value,
+      [evt.target.name]: evt.target.value,
     });
   };
 
+  // envio de datos para cotizacion
+
+  const cotizarSeguro = (evt) => {
+    evt.preventDefault();
+    if (marca.trim() === "" || year.trim() === "" || plan.trim() === "") {
+      guardarError(true);
+      return;
+    }
+
+    guardarError(false);
+  };
+
+  // una base de 2000
+
+  let resultado = 2000;
+
+  // obtener la diferencia de años
+
+  const diferencia = obtenerDiferenciaYear(year);
+
+  // por año se resta el 3%
+  resultado -= (diferencia * 3 * resultado) / 100;
+
+  // Americano 15%
+  // Asiatico 5%
+  // Europeo 30%
+  resultado = calcularMarca(marca) * resultado;
+
+  let incrementoPlan = obtenerPlan(plan);
+
+  resultado = parseFloat(incrementoPlan * resultado).toFixed(2);
+
+  guardarResumen({
+    cotizacion: resultado,
+    datos,
+  });
+
   return (
-    <form>
+    <form onSubmit={cotizarSeguro}>
+      {error ? <Error>Todos los campos son obligatorios</Error> : null}
       <Campo>
         <Label>Marca</Label>
         <Select name="marca" value={marca} onChange={obtenerInformacion}>
@@ -105,7 +153,7 @@ const Formulario = () => {
         Completo
       </Campo>
 
-      <Boton type="button">Cotizar</Boton>
+      <Boton type="submit">Cotizar</Boton>
     </form>
   );
 };
