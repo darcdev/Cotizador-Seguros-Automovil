@@ -15,7 +15,7 @@ export function calcularMarca(marca) {
       incremento = 1.15;
       break;
 
-    case "americano":
+    case "asiatico":
       incremento = 1.05;
       break;
     default:
@@ -25,7 +25,12 @@ export function calcularMarca(marca) {
 }
 
 // calcular tipo seguro
-
 export function obtenerPlan(plan) {
   return plan === "basico" ? 1.2 : 1.5;
+}
+
+// Muestra la primer letra mayuscula
+
+export function primeraMayuscula(texto) {
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
